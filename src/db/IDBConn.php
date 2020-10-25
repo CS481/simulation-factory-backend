@@ -1,4 +1,4 @@
-<?php namespace SimulationFactoryBackend
+<?php namespace SimulationFactoryBackend;
 interface IDBConn {
   // Use database native login function for user/pass
   public function __construct(string $user, string $pass);
