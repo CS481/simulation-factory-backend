@@ -1,6 +1,7 @@
 <?php namespace SimulationFactoryBackend;
 require __DIR__ . '/../../vendor/autoload.php';
 use MongoDB\Client;
+use MongoDB\BSON\ObjectId;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\Exception\AuthenticationException;
 use Exception;
@@ -86,16 +87,25 @@ class MongoConn {
       $projection_keys[$key] = 1;
     }
     $projection = ['projection' => $projection_keys];
+    $query = $this->normalize($query);
     return $coll->find($query, $projection);
   }
 
   public function update(string $collection, object $data, object $query) {
     $database = MongoConn::$database;
     $coll = $this->conn->$database->$collection;
+    $query = $this->normalize($query);
     $updateOneResult = $coll->updateOne($query, ['$set' => $data]);
     if ($updateOneResult->getMatchedCount() != 1) {
       throw new Exception('Failed to update data in the database');
     }
+  }
+
+  private function normalize(object $data) {
+   if (isset($data->_id)) {
+      $data->_id = new ObjectId($data->_id);
+    }
+    return $data;
   }
 
   private static function setCredentials() {
