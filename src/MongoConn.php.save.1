@@ -1,0 +1,88 @@
+<?php namespace SimulationFactoryBackend;
+require __DIR__ . '/../vendor/autoload.php';
+use MongoDB\Client;
+use Exception;
+
+class MongoConn {
+  protected $conn;
+  private static $username;
+  private static $password;
+  private static $host;
+
+  // TODO: default $database to 'SimulationFactory'
+  public function __construct(string $username, string $password, string $database='test') {
+    if (!isset(MongoConn::$username)) {
+      MongoConn::SetCredentials();
+    }
+    $this->conn = new Client("mongodb://${username}:${password}@${MongoConn::$host}");
+  }
+
+  public static function createUser(string $username, string $password, string $database='test') {
+    if (!isset(MongoConn::$username)) {
+      MongoConn::SetCredentials();
+    }
+    $conn_user = M
+    $conn_pass = MongoConn::$password;
+    $conn_host = MongoConn::$host;
+    $conn = new Client("mongodb://{MongoConn::$username}:{MongoConn::$password}@{MongoConn::$host}");
+    $coll = $conn->users;
+    $role->role = 'readWrite';
+    $role->db = $database;
+    $coll->command(
+      [
+        'createUser' => $username,
+        'pwd' => $password,
+        'roles' => [$role],
+      ],
+      [
+        'readPreference' => new MongoDB\Driver\ReadPreference(MongoDB\Driver\ReadPreference::RP_PRIMARY),
+      ]
+    );
+  }
+
+  public function beginTransaction() {}
+  public function submitTransaction() {}
+  public function abortTransaction() {}
+
+  public function insert(string $collection, object $data) {
+    $coll = $this->conn->$database->$collection;
+    $insertOneResult = $coll->insertOne($data);
+    if ($insertOneResult->getInsertedCount() != 1) {
+      throw new Exception('Failed to insert data into the database');
+    }
+  }
+
+  public function select(string $collection, object $query, array $keys=[]) {
+    $coll = $this->conn->$database->$collection;
+    $projection_keys = [];
+    foreach($keys as $key) {
+      $projection_keys[$key] = 1;
+    }
+    $projection = ['projection' => $projection_keys];
+    return $coll->find($query, $projection);
+  }
+
+  public function update(string $collection, object $data, object $query) {
+    $coll = $this->conn->$database->$collection;
+    $updateOneResult = $coll->updateOne($query, ['$set' => $data]);
+    if ($updateOneResult->getMatchedCount() != 1) {
+      throw new Exception('Failed to update data in the database');
+    }
+  }
+
+  private static function SetCredentials() {
+    echo 'yolo';
+    $ini_path = getenv('MONGODB_CREDENTIALS');
+    $ini_contents = parse_ini_file($ini_path);
+    if ($ini_contents == false) {
+      throw new Exception('Cannot read mongodb credentials file');
+    } else {
+      var_dump($ini_contents);
+      MongoConn::$username = $ini_contents['username'];
+      MongoConn::$password = $ini_contents['password'];
+      MongoConn::$host = $ini_contents['host'];
+      echo MongoConn::$username;
+    }
+  }
+}
+?>
