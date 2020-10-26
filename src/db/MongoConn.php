@@ -8,6 +8,7 @@ use Exception;
 use stdClass;
 
 // Can't seem to find IDBConn...not sure why. That's fine for now, I guess...
+// TODO: Enforce only allowing access to known tables
 class MongoConn {
   protected $conn;
   private static $database = "SimulationFactory";
@@ -64,6 +65,9 @@ class MongoConn {
     return MongoConn::createUser($json->user->username, $json->user->password);
   }
 
+  //TODO: More user-level operations
+
+  //TODO: transactions?
   public function beginTransaction() {}
   public function submitTransaction() {}
   public function abortTransaction() {}
@@ -73,7 +77,7 @@ class MongoConn {
     $coll = $this->conn->$database->$collection;
     $insertOneResult = $coll->insertOne($data);
     if ($insertOneResult->getInsertedCount() != 1) {
-      throw new Exception('Failed to insert data into the database');
+      throw new DBOpException('Failed to insert data into the database');
     } else {
       return (string)($insertOneResult->getInsertedId());
     }
@@ -97,7 +101,17 @@ class MongoConn {
     $query = $this->normalize($query);
     $updateOneResult = $coll->updateOne($query, ['$set' => $data]);
     if ($updateOneResult->getMatchedCount() != 1) {
-      throw new Exception('Failed to update data in the database');
+      throw new DBOpException('Failed to update data in the database');
+    }
+  }
+
+  public function delete(string $collection, object $query) {
+    $database = MongoConn::$database;
+    $coll = $this->conn->$database->$collection;
+    $query = $this->normalizeQuery($query);
+    $deleteOneResult = $coll->deleteOne($query);
+    if ($deleteOneResult->getDeletedCount() != 1) {
+      throw new DBOpException('Failed to delete data from the database');
     }
   }
 
