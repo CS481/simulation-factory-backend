@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+""" This script creates a hardcoded version of Druen's simulation using the api exposed to frontend.
+A random user is created to facilitate the simulation.
+Run it with `./create_sim.py`.
+"""
 import json
 import random
 import string
@@ -28,6 +32,9 @@ def post(resource, data, message="Posting"):
 def random_string(num_chars):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=num_chars))
 
+def num_range(start, stop, step):
+    return [i for i in range(start, stop+step, step)]
+
 def main():
     num_chars=16
     username = random_string(num_chars)
@@ -48,9 +55,15 @@ def main():
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
     frame_id = result['frame_id']
 
-    effects_dict = {'player1_cash': [[2, 1, 0], [4, 3, 2], [6, 5, 4]],
-                    'player2_cash': [[2, 4, 6], [1, 3, 5], [0, 2, 4]],
-                    'environment_change': [[-20, -10, 0], [-10, 0, 10], [0, 10, 20]]
+    effects_dict = {'player1_cash': [num_range(0, -6, -1), num_range(2, -4, -1), num_range(4, -2, -1),
+                                     num_range(6, 0, -1), num_range(8, 2, -1), num_range(10, 4, -1),
+                                     num_range(12, 6, -1)],
+                    'player2_cash': [num_range(0, 12, 2), num_range(-1, 11, 2), num_range(-2, 10, 2),
+                                     num_range(-3, 9, 2), num_range(-4, 8, 2), num_range(-5, 7, 2),
+                                     num_range(-6, 6, 2)],
+                    'environment': [num_range(-60, 0, 10), num_range(-50, 10, 10), num_range(-40, 20, 10),
+                                    num_range(-30, 30, 10), num_range(-20, 40, 10), num_range(-10, 50, 10),
+                                    num_range(0, 60, 10)]
                    }
     for name, resource in effects_dict.items():
         for i, row in enumerate(resource):
@@ -58,8 +71,11 @@ def main():
                 effects_dict[name][i][j] = value/100.0
     frame_modification = {'frame_id': frame_id,'simulation_id': sim_id, 'user': user,
                           'rounds': [i for i in range(10)],
-                          'prompt': 'The environment level is at ${environment}. How would you like to affect your production?',
-                          'responses': ['5, 0, -5'], 'effects': effects_dict
+                          'prompt': "The environment level is at ${resources.environment}. "
+                                    "Player1's cash is ${resources.player1_cash}. "
+                                    "Player2's cash is ${resources.player2_cash}. "
+                                    "How would you like to affect your production?",
+                          'responses': ['15', '10', '5', '0', '-5', '-10', '-15'], 'effects': effects_dict
                          }
     post('FrameModification', frame_modification, "Modifying frame")
 
