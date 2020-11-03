@@ -1,0 +1,8 @@
+{
+    "require": {
+        "mongodb/mongodb": "^1.7"
+    },
+    "autoload": {
+        "psr-4": {"SimulationFactoryBackend\\": "src/"}
+    }
+}
