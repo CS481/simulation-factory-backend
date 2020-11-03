@@ -128,7 +128,7 @@ class MongoConn implements IDBConn {
     }
   }
 
-  public function or(array ...$possibilities) : object {
+  public function or(object ...$possibilities) : object {
     return (object)['$or' => $possibilities];
   }
 
