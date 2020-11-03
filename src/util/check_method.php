@@ -1,5 +1,5 @@
-<?php
-// We can make this even MOAR FANCIER later if we need to, but this is all I need atm
+<?php namespace SimulationFactoryBackend;
+// Forces new http requests to use the specified method
 function only_allow_method(string $method) {
   if ($_SERVER['REQUEST_METHOD'] != $method) {
     header('Method Not Allowed', true, 405);
