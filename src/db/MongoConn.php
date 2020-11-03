@@ -1,5 +1,6 @@
 <?php namespace SimulationFactoryBackend;
-require __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/IDBConn.php';
 use MongoDB\Client;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Driver\ReadPreference;
@@ -7,9 +8,8 @@ use MongoDB\Driver\Exception\AuthenticationException;
 use Exception;
 use stdClass;
 
-// Can't seem to find IDBConn...not sure why. That's fine for now, I guess...
 // TODO: Enforce only allowing access to known tables
-class MongoConn {
+class MongoConn implements IDBConn {
   protected $conn;
   private static $database = "SimulationFactory";
   private static $username;
@@ -34,7 +34,7 @@ class MongoConn {
     }
   }
 
-  public static function constructFromJson(object $json) {
+  public static function constructFromJson(object $json) : IDBConn {
     return new MongoConn($json->user->username, $json->user->password);
   }
 
@@ -72,7 +72,7 @@ class MongoConn {
   public function submitTransaction() {}
   public function abortTransaction() {}
 
-  public function insert(string $collection, object $data) {
+  public function insert(string $collection, object $data) : string {
     $database = MongoConn::$database;
     $coll = $this->conn->$database->$collection;
     $insertOneResult = $coll->insertOne($data);
@@ -83,7 +83,7 @@ class MongoConn {
     }
   }
 
-  public function select(string $collection, object $query, array $keys=[]) {
+  public function select(string $collection, object $query, array $keys=[]) : \Traversable {
     $database = MongoConn::$database;
     $coll = $this->conn->$database->$collection;
     $projection_keys = [];
@@ -93,6 +93,19 @@ class MongoConn {
     $projection = ['projection' => $projection_keys];
     $query = $this->normalize($query);
     return $coll->find($query, $projection);
+  }
+
+  public function selectOne(string $collection, object $query, array $keys=[]) : object {
+    $database = MongoConn::$database;
+    $coll = $this->conn->$database->$collection;
+    $projection_keys = [];
+    foreach($keys as $key) {
+      $projection_keys[$key] = 1;
+    }
+    $projection = ['projection' => $projection_keys];
+    $query = $this->normalize($query);
+    return $coll->findOne($query, $projection);
+
   }
 
   public function update(string $collection, object $data, object $query) {
@@ -113,6 +126,14 @@ class MongoConn {
     if ($deleteOneResult->getDeletedCount() != 1) {
       throw new DBOpException('Failed to delete data from the database');
     }
+  }
+
+  public function or(array ...$possibilities) : object {
+    return (object)['$or' => $possibilities];
+  }
+
+  public function not_set() {
+    return ['$exists' => false];
   }
 
   private function normalize(object $data) {
