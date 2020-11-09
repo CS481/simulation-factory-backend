@@ -7,11 +7,12 @@ import json
 import random
 import string
 from functools import partial
+import os
 
 import requests
 from simplejson.errors import JSONDecodeError
 
-host = 'http://98.235.235.188/api'
+host = os.environ['REACT_APP_SIMULATION_FACTORY_URL']
 
 to_json = partial(json.dumps, indent=2, sort_keys=True)
 
@@ -36,7 +37,7 @@ def num_range(start, stop, step):
     return [i for i in range(start, stop+step, step)]
 
 def main():
-    num_chars=16
+    num_chars=32
     username = random_string(num_chars)
     password = random_string(num_chars)
     user = {"username": username, "password": password}
@@ -48,7 +49,7 @@ def main():
 
     resource_dict = {'player1_cash': 250000.0, 'player2_cash': 250000.0, 'environment': 500000.0}
     sim_modification = {'simulation_id': sim_id, 'user': user, 'name': "Professor Druen's awesome simulation",
-                        'resources': resource_dict}
+                        'resources': resource_dict, 'response_timeout': 10}
     post('SimulationModification', sim_modification, "Modifying sim")
 
     frame_initialization = {'simulation_id': sim_id, 'user': user}
@@ -74,11 +75,13 @@ def main():
                           'prompt': "The environment level is at ${resources.environment}. "
                                     "Player1's cash is ${resources.player1_cash}. "
                                     "Player2's cash is ${resources.player2_cash}. "
-                                    "How would you like to affect your production?",
-                          'responses': ['15', '10', '5', '0', '-5', '-10', '-15'], 'effects': effects_dict
+                                    "How would you like to affect your production? "
+                                    "Your deadline is ${response_deadline}",
+                          'responses': ['15', '10', '5', '0', '-5', '-10', '-15'], 'effects': effects_dict,
+                          'default_action': '0'
                          }
     post('FrameModification', frame_modification, "Modifying frame")
 
     print(f"Your sim id is {sim_id}")
 if __name__ == '__main__':
-    main();
+    main()
