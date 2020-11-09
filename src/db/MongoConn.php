@@ -1,4 +1,4 @@
-<?php namespace SimulationFactoryBackend;
+<?php namespace SimulationFactoryBackend\db;
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/IDBConn.php';
 use MongoDB\Client;
@@ -104,8 +104,11 @@ class MongoConn implements IDBConn {
     }
     $projection = ['projection' => $projection_keys];
     $query = $this->normalize($query);
-    return $coll->findOne($query, $projection);
-
+    $result = $coll->findOne($query, $projection);
+    if (is_null($result)) {
+      throw new DBOpException('Failed to select one result from the database');
+    }
+    return $result;
   }
 
   public function update(string $collection, object $data, object $query) {

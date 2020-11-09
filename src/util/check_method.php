@@ -1,4 +1,4 @@
-<?php namespace SimulationFactoryBackend;
+<?php namespace SimulationFactoryBackend\util;
 // Forces new http requests to use the specified method
 function only_allow_method(string $method) {
   if ($_SERVER['REQUEST_METHOD'] != $method) {

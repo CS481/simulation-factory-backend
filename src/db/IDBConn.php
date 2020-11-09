@@ -1,4 +1,4 @@
-<?php namespace SimulationFactoryBackend;
+<?php namespace SimulationFactoryBackend\db;
 interface IDBConn {
   // Login to the database with the given username and password
   public function __construct(string $user, string $pass);
