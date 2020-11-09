@@ -31,6 +31,9 @@ interface IDBConn {
   // The existing record is merged with $data, which keeps all keys in both objects.
   // If the same key exists in $data and the database, the database entry is overwritten
   public function update(string $table, object $data, object $query);
+  // Behaves just like update, except replace completely replaces the target document with $data.
+  // The id field, however, is not changed
+  public function replace(string $table, object $data, object $query);
   // Deletes the first existing record that matches the criteria.
   // The record is selected using $query, exactly like select()
   public function delete(string $collection, object $query);

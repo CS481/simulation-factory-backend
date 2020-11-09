@@ -121,6 +121,16 @@ class MongoConn implements IDBConn {
     }
   }
 
+  public function replace(string $collection, object $data, object $query) {
+    $database = MongoConn::$database;
+    $coll = $this->conn->$database->$collection;
+    $query = $this->normalize($query);
+    $replaceOneResult = $coll->replaceOne($query, $data);
+    if ($replaceOneResult->getMatchedCount() != 1) {
+      throw new DBOpException('Failed to replace data in the database');
+    }
+  }
+
   public function delete(string $collection, object $query) {
     $database = MongoConn::$database;
     $coll = $this->conn->$database->$collection;
