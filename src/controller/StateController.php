@@ -1,4 +1,4 @@
-<?php namespace SimulationFactory\controller;
+<?php namespace SimulationFactoryBackend\controller;
 // updates a response record and progresses the sim to the next round
 // $conn is the IDBConn instance to use
 // sim_instance is the simulation instance to use
@@ -9,6 +9,8 @@ function update_response_record($conn, object $sim_instance, string $response, s
   if (!(($cur_user == 'player1' && $other_user == 'player2') || ($cur_user == 'player2' && $other_user == 'player1'))) {
     throw new \Exception("One of cur_user and other_user arguments must be equal to 'player1', and the other".
 			 "must be equal to 'player2'. Instead got cur_user=${cur_user} and other_user=${other_user}");
+  } else if ($sim_instance->turn_number < 0) {
+    return; // Do not update sim_instances which have already completed
   }
 
   $search_for = (object)['rounds' => $sim_instance->turn_number,
@@ -60,6 +62,8 @@ function update_response_record($conn, object $sim_instance, string $response, s
 function create_response_record($conn, object $sim_instance, string $response, string $cur_user) {
   if ($cur_user != 'player1' && $cur_user != 'player2') {
     throw new \Exception("cur_user must be either 'player1' or 'player2'. Instead, cur_user=$cur_user");
+  } else if ($sim_instance->turn_number < 0) {
+    return; // Do not update sim_instances which have already completed
   }
 
   $insert = (object)[$cur_user => $sim_instance->$cur_user,
