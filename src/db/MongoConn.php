@@ -134,7 +134,7 @@ class MongoConn implements IDBConn {
   public function delete(string $collection, object $query) {
     $database = MongoConn::$database;
     $coll = $this->conn->$database->$collection;
-    $query = $this->normalizeQuery($query);
+    $query = $this->normalize($query);
     $deleteOneResult = $coll->deleteOne($query);
     if ($deleteOneResult->getDeletedCount() != 1) {
       throw new DBOpException('Failed to delete data from the database');
