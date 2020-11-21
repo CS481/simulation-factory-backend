@@ -36,7 +36,7 @@ function modify_frame($conn, object $user, object $frame_data, string $frame_id)
 // $conn is an instance of IDBConn
 // $user is the User json to use to modify the frame
 // $frame_id is the id of the frame to delete
-function delete_frame($conn, object $user, object $frame_id) {
+function delete_frame($conn, object $user, string $frame_id) {
   $frame_query = (object)['_id' => $frame_id];
   $frame = $conn->selectOne('Frames', $frame_query);
   \SimulationFactoryBackend\util\validate_simulation_owner($conn, $user, $frame->simulation_id);
