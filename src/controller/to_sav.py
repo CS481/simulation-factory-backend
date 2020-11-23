@@ -39,11 +39,7 @@ def main():
 
     client = MongoClient(args.connection)
     db = client[args.database]
-    records_list = []
-    for record in db.ResponseRecords.find({'simulation_id': args.simulation_id}):
-        norm_record = normalize(record)
-        records_list.append(norm_record)
-    # records_list = [normalize(record) for record in db.ResponseRecords.find({'simulation_id': args.simulation_id})]
+    records_list = [normalize(record) for record in db.ResponseRecords.find({'simulation_id': args.simulation_id})]
     records_df = DataFrame(records_list)
 
     records_sav = os.path.join('/tmp', f'{os.urandom(24).hex()}.sav')
