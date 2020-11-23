@@ -48,5 +48,10 @@ interface IDBConn {
   // For example, in order to create a query that selects a record only if player2 is not set:
   //   $query->player2 = $conn->not_set();
   public function not_set();
+
+  // Returns the connection string required to access the database, using the given username and password
+  public static function getConnectionString(string $username, string $password) : string;
+  // Returns the database used by this IDBConn instance
+  public static function getDatabase() : string;
 }
 ?>

@@ -17,15 +17,8 @@ class MongoConn implements IDBConn {
   private static $host;
 
   public function __construct(string $username, string $password) {
-    if (!isset(MongoConn::$username)) {
-      MongoConn::setCredentials();
-    }
-    $database = MongoConn::$database;
-    $conn_user = urlencode($username);
-    $conn_pass = urlencode($password);
-    $conn_host = MongoConn::$host;
     try {
-      $this->conn = new Client("mongodb://${conn_user}:${conn_pass}@${conn_host}/${database}");
+      $this->conn = new Client(MongoConn::getConnectionString($username, $password));
       $this->select("nodata", new stdClass()); // Try to view some data, in order to ensure the user is authenticated properly
   } catch (AuthenticationException $_) {
       header("Unauthorized", true, 401);
@@ -42,17 +35,15 @@ class MongoConn implements IDBConn {
     if (!isset(MongoConn::$username)) {
       MongoConn::setCredentials();
     }
-
+    $new_user = urlencode($username);
+    $new_pass = urlencode($password);
+    $conn = new Client(MongoConn::getConnectionString(MongoConn::$username, MongoConn::$password));
     $database = MongoConn::$database;
-    $conn_user = urlencode(MongoConn::$username);
-    $conn_pass = urlencode(MongoConn::$password);
-    $conn_host = MongoConn::$host;
-    $conn = new Client("mongodb://${conn_user}:${conn_pass}@${conn_host}/${database}");
     $coll = $conn->$database;
     $coll->command(
       [
-        'createUser' => $username,
-        'pwd' => $password,
+        'createUser' => $new_user,
+        'pwd' => $new_pass,
         'roles' => ['readWrite'],
       ],
       [
@@ -147,6 +138,24 @@ class MongoConn implements IDBConn {
 
   public function not_set() {
     return ['$exists' => false];
+  }
+
+  public static function getConnectionString(string $username, string $password) : string {
+    if (!isset(MongoConn::$username)) {
+      MongoConn::setCredentials();
+    }
+    $database = MongoConn::$database;
+    $conn_user = urlencode($username);
+    $conn_pass = urlencode($password);
+    $conn_host = MongoConn::$host;
+    return "mongodb://${conn_user}:${conn_pass}@${conn_host}/${database}";
+  }
+
+  public static function getDatabase() : string {
+    if (!isset(MongoConn::$username)) {
+      MongoConn::setCredentials();
+    }
+    return MongoConn::$database;
   }
 
   private function normalize(object $data) {
