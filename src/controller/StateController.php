@@ -39,7 +39,8 @@ function update_response_record($conn, object $sim_instance, string $response, s
       $player1_response_index = get_index($log_entry->$player1_response_key, $frame->responses);
     }
 
-    $sim_instance->resources->$resource += $value * $frame->effects->$resource[$player1_response_index][$player2_response_index];
+    list($effect_amount, $operation) = get_effect($frame, $resource, $player1_response_index, $player2_response_index);
+    $sim_instance->resources->$resource += $value * $effect_amount;
     $log_update->resources->$resource = $sim_instance->resources->$resource;
   }
   $sim_instance->turn_number++;
@@ -87,5 +88,15 @@ function get_index($value, $arr) {
       return $index;
     }
   }
+}
+
+// Gets the effect amount and operation for the given frame, resource, and player responses
+function get_effect($frame, $resource, $player1_response_index, $player2_response_index) {
+  foreach($frame->effects as $effect) {
+    if ($effect->resource == $resource) {
+      return array($effect->effects[$player1_response_index][$player2_response_index], $effect->operation);
+    }
+  }
+  throw new \Exception("There is no effect for the simulation resource ${resource}");
 }
 ?>

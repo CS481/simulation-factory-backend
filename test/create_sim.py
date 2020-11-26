@@ -16,7 +16,7 @@ host = os.environ['REACT_APP_SIMULATION_FACTORY_URL']
 
 to_json = partial(json.dumps, indent=2, sort_keys=True)
 
-def post(resource, data, message="Posting"): 
+def post(resource, data, message="Posting"):
     json_data = to_json(data)
     print(f'{message} with the following data:\n{json_data}')
     response = requests.post(f'{host}/{resource}.php', data=json_data)
@@ -70,14 +70,31 @@ def main():
         for i, row in enumerate(resource):
             for j, value in enumerate(row):
                 effects_dict[name][i][j] = value/100.0
-    frame_modification = {'frame_id': frame_id,'simulation_id': sim_id, 'user': user,
+    frame_effects = [
+        {
+            'resource': 'player1_cash',
+            'operation': '*',
+            'effects': effects_dict['player1_cash']
+        },
+        {
+            'resource': 'player2_cash',
+            'operation': '*',
+            'effects': effects_dict['player2_cash']
+        },
+        {
+            'resource': 'environment',
+            'operation': '*',
+            'effects': effects_dict['environment']
+        }
+    ]
+    frame_modification = {'frame_id': frame_id, 'user': user,
                           'rounds': [i for i in range(10)],
                           'prompt': "The environment level is at ${resources.environment}. "
                                     "Player1's cash is ${resources.player1_cash}. "
                                     "Player2's cash is ${resources.player2_cash}. "
                                     "How would you like to affect your production? "
                                     "Your deadline is ${response_deadline}",
-                          'responses': ['15', '10', '5', '0', '-5', '-10', '-15'], 'effects': effects_dict,
+                          'responses': ['15', '10', '5', '0', '-5', '-10', '-15'], 'effects': frame_effects,
                           'default_action': '0'
                          }
     post('FrameModification', frame_modification, "Modifying frame")
