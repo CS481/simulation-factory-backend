@@ -60,12 +60,31 @@ def main():
                     'sacrificers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                     'food': [[-0.4, -0.1, 0.0],[-0.3, -0.2, 0.2],[0.0, 0.2, 0.4]]
                    }
-    frame_modification = {'frame_id': frame_id,'simulation_id': sim_id, 'user': user,
+
+    effects = [
+        {
+            'resource': 'infected',
+            'operation': '*',
+            'effects': [[0.0, 0.05, 0.1],[0.05, 0.1, 0.15],[0.1, 0.15, 0.2]]
+        },
+        {
+            'resource': 'sacrificers',
+            'operation': '*',
+            'effects': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        },
+        {
+            'resource': 'food',
+            'operation': '*',
+            'effects': [[-0.4, -0.1, 0.0],[-0.3, -0.2, 0.2],[0.0, 0.2, 0.4]]
+        }
+    ]
+
+    frame_modification = {'frame_id': frame_id, 'user': user,
                           'rounds': [0],
                           'prompt': "You are the leader of a small country that is experiencing a zombie outbreak. "
                                     "There are ${resources.infected} infected, and you have ${resources.food} days of food stockpiled. "
                                     "How would you like to respond to the zombie outbreak?",
-                          'responses': ['Arm the people', 'Vaccine Research', 'Gather food'], 'effects': effects_dict,
+                          'responses': ['Arm the people', 'Vaccine Research', 'Gather food'], 'effects': effects,
                           'default_action': 'Arm the people'
                          }
     post('FrameModification', frame_modification, "Modifying frame")
@@ -73,33 +92,42 @@ def main():
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
     frame_id = result['frame_id']
 
-    effects_dict = {'infected': [[0.0]],
-                    'sacrificers': [[0.0]],
-                    'food': [[0.0]]
-                   }
-    frame_modification = {'frame_id': frame_id,'simulation_id': sim_id, 'user': user,
+    effects = [
+        {
+            'resource': 'infected',
+            'operation': '*',
+            'effects': [[0]]
+        },
+        {
+            'resource': 'sacrificers',
+            'operation': '*',
+            'effects': [[0]]
+        },
+        {
+            'resource': 'food',
+            'operation': '*',
+            'effects': [[0]]
+        }
+    ]
+    frame_modification = {'frame_id': frame_id, 'user': user,
                           'rounds': [1],
                           'prompt': "Oh no! A small cult has arisen. They believe that sacrificing healthy individuals "
                                     "to the zombie hordes will appease their god.",
-                          'responses': ['Ok'], 'effects': effects_dict, 'default_action': 'Ok'
+                          'responses': ['Ok'], 'effects': effects, 'default_action': 'Ok'
                          }
     post('FrameModification', frame_modification, "Modifying frame")
 
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
     frame_id = result['frame_id']
 
-    effects_dict = {'infected': [[0.0]],
-                    'sacrificers': [[0.0]],
-                    'food': [[0.0]]
-                    }
-    frame_modification = {'frame_id': frame_id,'simulation_id': sim_id, 'user': user,
+    frame_modification = {'frame_id': frame_id, 'user': user,
                           'rounds': [2],
                           'prompt': "You are the leader of a small country that is experiencing a zombie outbreak. "
                                     "There are ${resources.infected} infected, and you have ${resources.food} days of food stockpiled. "
                                     "There are ${resources.sacrificers} cultists sacrificing your people. "
                                     "How would you like to respond to the zombie outbreak?",
                           'responses': ['Arm the people', 'Vaccine Research', 'Gather food', 'Give those cultists a taste of their own medicine'],
-                          'effects': effects_dict, 'default_action': 'Arm the people'
+                          'effects': effects, 'default_action': 'Arm the people'
                          }
     post('FrameModification', frame_modification, "Modifying frame")
 
