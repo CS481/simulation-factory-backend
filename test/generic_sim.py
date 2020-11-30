@@ -41,20 +41,19 @@ def main():
     username = random_string(num_chars)
     password = random_string(num_chars)
     user = {"username": username, "password": password}
-    generic_user = {"user": user}
-    post('CreateUser', generic_user, 'Creating user')
+    post('CreateUser', user, 'Creating user')
 
-    result = post('SimulationInitialization', generic_user, 'Initializing sim')
-    sim_id = result['simulation_id']
+    result = post('SimulationInitialization', user, 'Initializing sim')
+    sim_id = result['id']
 
     resource_dict = {'infected': 1000.0, 'sacrificers': 50.0, 'food': 200.0}
     sim_modification = {'simulation_id': sim_id, 'user': user, 'name': "Zombie survival",
                         'resources': resource_dict, 'response_timeout': 180}
     post('SimulationModification', sim_modification, "Modifying sim")
 
-    frame_initialization = {'simulation_id': sim_id, 'user': user}
+    frame_initialization = {'id': sim_id, 'user': user}
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
-    frame_id = result['frame_id']
+    frame_id = result['id']
 
     effects_dict = {'infected': [[0.0, 0.05, 0.1],[0.05, 0.1, 0.15],[0.1, 0.15, 0.2]],
                     'sacrificers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
@@ -90,7 +89,7 @@ def main():
     post('FrameModification', frame_modification, "Modifying frame")
 
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
-    frame_id = result['frame_id']
+    frame_id = result['id']
 
     effects = [
         {
@@ -118,7 +117,7 @@ def main():
     post('FrameModification', frame_modification, "Modifying frame")
 
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
-    frame_id = result['frame_id']
+    frame_id = result['id']
 
     frame_modification = {'frame_id': frame_id, 'user': user,
                           'rounds': [2],

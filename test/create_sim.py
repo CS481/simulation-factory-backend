@@ -41,20 +41,19 @@ def main():
     username = random_string(num_chars)
     password = random_string(num_chars)
     user = {"username": username, "password": password}
-    generic_user = {"user": user}
-    post('CreateUser', generic_user, 'Creating user')
+    post('CreateUser', user, 'Creating user')
 
-    result = post('SimulationInitialization', generic_user, 'Initializing sim')
-    sim_id = result['simulation_id']
+    result = post('SimulationInitialization', user, 'Initializing sim')
+    sim_id = result['id']
 
     resource_dict = {'player1_cash': 250000.0, 'player2_cash': 250000.0, 'environment': 500000.0}
     sim_modification = {'simulation_id': sim_id, 'user': user, 'name': "Professor Druen's awesome simulation",
                         'resources': resource_dict, 'response_timeout': 10}
     post('SimulationModification', sim_modification, "Modifying sim")
 
-    frame_initialization = {'simulation_id': sim_id, 'user': user}
+    frame_initialization = {'id': sim_id, 'user': user}
     result = post('FrameInitialization', frame_initialization, "Initializing frame")
-    frame_id = result['frame_id']
+    frame_id = result['id']
 
     effects_dict = {'player1_cash': [num_range(0, -6, -1), num_range(2, -4, -1), num_range(4, -2, -1),
                                      num_range(6, 0, -1), num_range(8, 2, -1), num_range(10, 4, -1),
