@@ -11,13 +11,14 @@ use stdClass;
 // TODO: Enforce only allowing access to known tables
 class MongoConn implements IDBConn {
   protected $conn;
-  private static $database = "SimulationFactory";
+  private static $database; // = "SimulationFactory";
   private static $username;
   private static $password;
   private static $host;
 
-  public function __construct(string $username, string $password) {
+  public function __construct(string $username, string $password, string $database="SimulationFactory") {
     try {
+      MongoConn::$database = $database;
       $this->conn = new Client(MongoConn::getConnectionString($username, $password));
       $this->select("nodata", new stdClass()); // Try to view some data, in order to ensure the user is authenticated properly
   } catch (AuthenticationException $_) {
@@ -27,13 +28,14 @@ class MongoConn implements IDBConn {
     }
   }
 
-  public static function constructFromJson(object $json) : IDBConn {
-    return new MongoConn($json->user->username, $json->user->password);
+  public static function constructFromJson(object $json, string $database="SimulationFactory") : IDBConn {
+    return new MongoConn($json->user->username, $json->user->password, $database);
   }
 
-  public static function createUser(string $username, string $password) {
+  public static function createUser(string $username, string $password, string $database="SimulationFactory") {
     if (!isset(MongoConn::$username)) {
       MongoConn::setCredentials();
+      MongoConn::$database = $database;
     }
     $new_user = urlencode($username);
     $new_pass = urlencode($password);
@@ -52,8 +54,8 @@ class MongoConn implements IDBConn {
     );
   }
 
-  public static function createUserFromJson(object $json) {
-    return MongoConn::createUser($json->user->username, $json->user->password);
+  public static function createUserFromJson(object $json, string $database="SimulationFactory") {
+    return MongoConn::createUser($json->user->username, $json->user->password, $database);
   }
 
   //TODO: More user-level operations
